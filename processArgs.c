@@ -1,7 +1,8 @@
 /// @file processArgs
 /// @author Kunlin Wen, kw9521
 
-#define DELIMITERS   " \t\n"        // separate tokens using whitespace
+#define DELIMITERS   " \t"        // separate tokens using whitespace
+#define DELIMSWITHNEWLINE " \t\n"
 #define _DEFAULT_SOURCE             // must be before all #include to be able to use getline()
 
 #include <stddef.h>     // for size_t
@@ -13,17 +14,48 @@
 #include <ctype.h>      // for isalpha
 #include "HashADT.h"
 
+size_t numOfPplInNetwork = 0;
+size_t numOfFriendShips = 0;
+
+typedef struct person_s {
+    char *firstName;            // name of the person
+    char *lastName;
+    char *handle;               // handle of the person
+    struct person_s **friends;  // dynamic collection of friends
+    size_t numOfFriends;        // number of friendships 
+    size_t maxFriends;          // current limit on friends, need if ur using dynamic array that doubles in size everytme the array is full
+} person_t;
+
+person_t* makePerson(char* firstName, char* lastName, char* handle){
+
+    person_t * person = (person_t*)malloc(sizeof(person_t));
+
+    // check if memeory was correctly allocated
+    assert(person != NULL);
+
+    person -> firstName = firstName;
+    person -> lastName = lastName;
+    person -> handle = handle;
+    person -> friends = (person_t**)malloc((person -> maxFriends)* sizeof(person_t*));
+    person -> numOfFriends = 0;
+    person -> maxFriends = 100;
+
+    // increase the num of people made 
+    numOfPplInNetwork++;
+}
 
 bool checkValidName(char* name) {
 
     // check if first letters is an alphabet character
     if (name == NULL || !isalpha(name[0])) {
+        printf("error: argument \"%s\" is invalid", name);
         return false;
     }
 
     // checks if alphabetic characters (uppercase and lowercase) along with the apostrophe ('\'') and hyphen ('-') characters
     for (int i = 1; name[i] != '\0'; i++) {
         if (!isalpha(name[i]) && name[i] != '\'' && name[i] != '-') {
+            printf("error: argument \"%s\" is invalid", name);
             return false;
         }
     }
@@ -35,12 +67,14 @@ bool checkHandle(char *handle) {
 
     // check if first letters is an alphabet character
     if (handle == NULL || !isalpha(handle[0])) {
+        printf("error: argument \"%s\" is invalid", handle);
         return false;
     }
 
     // checks if handle consist of alphanumeric characters 
     for (int i = 1; handle[i] != '\0'; i++) {
         if (!isalnum(handle[i])) {
+            printf("error: argument \"%s\" is invalid", handle);
             return false;
         }
     }
@@ -48,15 +82,41 @@ bool checkHandle(char *handle) {
     return true;
 }
 
+bool checkIfHandleExists(const HashADT table, const char *handle){
+    if (ht_has(table, handle)) {
+        return true;
+    }
+    printf("error: handle \"%s\" is unknown", handle);
+    return false; 
+    
+}
 
-void processCommands(bool isStdin, FILE *fp){
+bool areTheyFriendsAlr(const HashADT table, const char *handle1, const char *handle2){
+    person_t* p1 = (person_t*)ht_get(table,handle1);
+
+    // check if p1 exists
+    assert(p1 != NULL);
+
+    for (size_t i = 0; i < p1->numOfFriends; i++) {
+        if(p1->friends[i] != NULL && strcmp(p1->friends[i]->handle, handle2) == 0){
+            return true;
+        } 
+    } 
+    return false; 
+}
+
+void addFriends(const HashADT table, const char *handle1, const char *handle2){
+
+}
+
+void processCommands(bool isStdin, FILE *fp, HashADT table){
     char buffer[256];
     while ((isStdin ? fgets(buffer, 256, stdin) : fgets(buffer, 256, fp)) != NULL) {
         char *token;
 
         // first call specifies the buffer to be parsed
         // gets rid of space, tabs and new lines
-        token = strtok( buffer, DELIMITERS );   
+        token = strtok( buffer, DELIMSWITHNEWLINE );   
 
         while (token != NULL) {
 
@@ -68,20 +128,23 @@ void processCommands(bool isStdin, FILE *fp){
                 char * handle = strtok( NULL, DELIMITERS );
                 char * extras = strtok( NULL, DELIMITERS );
 
+
                 // checks firstName, lastName, handle is NOT NULL, checks of extras IS NULL
                 // if any of these are true, it means there is too few args or too much args
-                if (firstName == NULL || lastName == NULL|| handle == NULL || !(extras == NULL)) {
+                if (firstName == NULL || lastName == NULL|| handle == NULL || (extras != NULL && extras[0] != '#')) {
                     printf("error: usage: add first-name last-name handle");
                 }
 
-                if (!checkValidName(firstName)){
-                    printf("error: argument \"%s\" is invalid", firstName);
-                } else if (!checkValidName(lastName)){
-                    printf("error: argument \"%s\" is invalid", lastName);
-                } else if (!checkHandle){
-                    printf("error: argument \"%s\" is invalid", handle);
-                } else {
-                    // all 3 are valid... call the add funtion
+                if (checkValidName(firstName) && checkValidName(lastName) && checkHandle(handle)) {
+                    
+                    // check if handle is alr in data base, if so print error
+                    if(ht_has(table, handle)){
+                        printf("error: handle \"%s\" is already in use", handle);
+                    } else {
+                        // if handle is not in database, add to database
+                        person_t * p1 = makePerson(firstName, lastName, handle);
+                        ht_put(table, handle, p1);
+                    }
                 }
 
                 
@@ -94,19 +157,23 @@ void processCommands(bool isStdin, FILE *fp){
                 
                 // checks to make sure handle1 and handle1 are valid and that extras is NULL
                 // if any of these are false, there are too few or too many args 
-                if(handle1 == NULL || handle2 == NULL|| !(extras == NULL)){
+                if(handle1 == NULL || handle2 == NULL|| (extras != NULL && extras[0] != '#')){
                     printf("error: usage: friend  handle1  handle2");
                 } 
 
                 // check if handle1 and handle2 are part of the database!!!!!
                 // if not, print... printf("error: handle "%s" is unknown", handle1/handle2);
-
-
-                if (checkHandle(handle1) && checkHandle(handle2)){
+                
+                if (checkHandle(handle1) && checkHandle(handle2) && checkIfHandleExists(table, handle1) && checkIfHandleExists(table, handle2)){
                     
-                    // TODO
-                    // handle1 and handle2 are VALID, are alphanumerical n starts with letter...call the friend command
-                    // TODO
+                    // check if they're alr friends, if not make then friends
+                    // otherwise print error message 
+                    if (areTheyFriendsAlr(table, handle1, handle2)){
+                        printf("%s and %s are already friends", handle1, handle2);
+                    } else {
+
+                    }
+                    
 
                 }
             
@@ -117,7 +184,7 @@ void processCommands(bool isStdin, FILE *fp){
                 char * extras = strtok( NULL, DELIMITERS );
 
                 // if there are args after "init" command, its an error
-                if (!(extras == NULL)){
+                if ((extras != NULL && extras[0] != '#')){
                     printf("error: usage: init");
                 } 
 
@@ -133,7 +200,7 @@ void processCommands(bool isStdin, FILE *fp){
                 char * extras = strtok( NULL, DELIMITERS );
 
                 // check for valid amount of arguments
-                if (handle == NULL || !(extras == NULL)){
+                if (handle == NULL || (extras != NULL && extras[0] != '#')){
                     printf("error: usage: print handle");
                 }
 
@@ -156,7 +223,7 @@ void processCommands(bool isStdin, FILE *fp){
                 char * extras = strtok( NULL, DELIMITERS );
 
                 // if there are args after "quit" command, its an error
-                if (!(extras == NULL)){
+                if ((extras != NULL && extras[0] != '#')){
                     printf("error: usage: quit");
                 } 
 
@@ -168,7 +235,7 @@ void processCommands(bool isStdin, FILE *fp){
                 char * extras = strtok( NULL, DELIMITERS );
                 
                 // check for valid amount of arguments
-                if (handle == NULL || !(extras == NULL)){
+                if (handle == NULL || (extras != NULL && extras[0] != '#')){
                     printf("error: usage: size handle");
                 }
 
@@ -185,7 +252,7 @@ void processCommands(bool isStdin, FILE *fp){
                 char * extras = strtok( NULL, DELIMITERS );
 
                 // if there are args after "quit" command, its an error
-                if (!(extras == NULL)){
+                if ((extras != NULL && extras[0] != '#')){
                     printf("error: usage: stats");
                 } 
 
@@ -205,13 +272,12 @@ void processCommands(bool isStdin, FILE *fp){
                 
                 // checks to make sure handle1 and handle1 are valid and that extras is NULL
                 // if any of these are false, there are too few or too many args 
-                if(handle1 == NULL || handle2 == NULL|| !(extras == NULL)){
+                if(handle1 == NULL || handle2 == NULL|| (extras != NULL && extras[0] != '#')){
                     printf("error: usage: unfriend  handle1  handle2");
                 } 
 
                 // check if handle1 and handle2 are even friends in the first place!!!!!
                 // if not, print... printf("%s and %s are not friends.", handle1, handle2);
-
 
                 if (checkHandle(handle1) && checkHandle(handle2)){
                     
@@ -226,6 +292,8 @@ void processCommands(bool isStdin, FILE *fp){
             
             }
             // subsequent calls to parse the same buffer
-            token = strtok( NULL, DELIMITERS );
+            token = strtok( NULL, DELIMSWITHNEWLINE );
     }
+}
+
 }
