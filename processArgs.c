@@ -106,8 +106,50 @@ bool areTheyFriendsAlr(const HashADT table, const char *handle1, const char *han
 }
 
 void addFriends(const HashADT table, const char *handle1, const char *handle2){
+    person_t* p1 = (person_t*)ht_get(table, handle1);
+
+    // check if p1 exists
+    assert(p1 != NULL);
+
+    if (p1->numOfFriends >= p1->maxFriends) {
+        size_t newSize = p1->maxFriends * 2;
+        p1->friends = (person_t **)realloc(p1->friends, newSize * sizeof(person_t *));
+        
+        assert(p1->friends != NULL);
+        p1->maxFriends = newSize;
+    }
+    
+    // Add the friend
+    p1->friends[p1->numOfFriends] = ht_get(table, handle2);
+    p1->numOfFriends++;
 
 }
+
+void initSystem(HashADT table) {
+    // Get all values (persons) in the hash table
+    void **allPersons = ht_values(table);
+    if (allPersons != NULL) {
+        for (size_t i = 0; allPersons[i] != NULL; i++) {
+            person_t *person = (person_t *)allPersons[i];
+
+            // Free the friends array
+            free(person->friends);
+
+            // Free the person struct itself
+            free(person);
+        }
+
+        // Free the array holding all persons
+        free(allPersons);
+    }
+
+    // Reset global counts
+    numOfPplInNetwork = 0;
+    numOfFriendShips = 0;
+
+    printf("System re-initialized\n");
+}
+
 
 void processCommands(bool isStdin, FILE *fp, HashADT table){
     char buffer[256];
@@ -171,10 +213,13 @@ void processCommands(bool isStdin, FILE *fp, HashADT table){
                     if (areTheyFriendsAlr(table, handle1, handle2)){
                         printf("%s and %s are already friends", handle1, handle2);
                     } else {
+                        addFriends(table, handle1, handle2);
+                        addFriends(table, handle2, handle1);
 
+                        numOfFriendShips++; 
+                        printf("%s and %s are now friends", handle1, handle2);
                     }
                     
-
                 }
             
                 
@@ -186,13 +231,15 @@ void processCommands(bool isStdin, FILE *fp, HashADT table){
                 // if there are args after "init" command, its an error
                 if ((extras != NULL && extras[0] != '#')){
                     printf("error: usage: init");
-                } 
+                } else {
 
-                // otherwise, Delete the entire contents of the system, releasing all dynamic storage
-                // Re-initialize to an empty network, print the following message, and then loop to print a new prompt
-                // message: System re-initialized
-                
-                
+                    // otherwise, Delete the entire contents of the system, releasing all dynamic storage
+                    // Re-initialize to an empty network, print the following message, and then loop to print a new prompt
+                    // message: System re-initialized
+
+                    initSystem(table);
+                }
+
             } else if (strcmp(token, "print")){
                 // print handle
 
