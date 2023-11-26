@@ -150,6 +150,31 @@ void initSystem(HashADT table) {
     printf("System re-initialized\n");
 }
 
+void printCase(const HashADT table, const char *handle) {
+    person_t *person = (person_t *)ht_get(table, handle);
+    
+    // Check if the person exists
+    if (person == NULL) {
+        printf("error: handle \"%s\" is unknown\n", handle);
+        return;
+    }
+
+    // Print the person's name and handle
+    printf("%s (%s %s) ", person->handle, person->firstName, person->lastName);
+
+    // Print the friend list
+    if (person->numOfFriends == 0) {
+        printf("has no friends\n");
+    } else {
+        printf("has %zu friend%s\n", person->numOfFriends, person->numOfFriends > 1 ? "s" : "");
+        for (size_t i = 0; i < person->numOfFriends; i++) {
+            if (person->friends[i] != NULL) {
+                printf("\t%s (%s %s)\n", person->friends[i]->handle, person->friends[i]->firstName, person->friends[i]->lastName);
+            }
+        }
+    }
+}
+
 
 void processCommands(bool isStdin, FILE *fp, HashADT table){
     char buffer[256];
@@ -260,6 +285,7 @@ void processCommands(bool isStdin, FILE *fp, HashADT table){
                     // (\t)handle (fname lname)
                     // eg: abe (A Lincoln) has 3 friends
 	                //          anthony (A Blinken)
+                    printCase(table, handle);
                 
                 } 
                 
