@@ -12,14 +12,29 @@
 #include "HashADT.h"
 
 typedef struct person_s {
-    char *name;                 // name of the person
+    char *firstName;            // name of the person
+    char *lastName;
     char *handle;               // handle of the person
     struct person_s **friends;  // dynamic collection of friends
-    size_t numOfFriendships;    // number of friendships created since the start (or re-initialization)...this number fluctuates as friendships come and go
-    size_t totalNetworks;       // total number of persons in the system
-
-    // size_t max_friends;         // current limit on friends, need if ur using dynamic array that doubles in size everytme the array is full
+    size_t numOfFriends;        // number of friendships 
+    size_t maxFriends;         // current limit on friends, need if ur using dynamic array that doubles in size everytme the array is full
 } person_t;
+
+person_t* makePerson(char* firstName, char* lastName, char* handle){
+
+    person_t * person = (person_t*)malloc(sizeof(person_t));
+
+    // check if memeory was correctly allocated
+    assert(person != NULL);
+
+    person -> firstName = firstName;
+    person -> lastName = lastName;
+    person -> handle = handle;
+    person -> friends = (person_t**)malloc((person -> max_friends)* sizeof(person_t*));
+    person -> numOfFriends = 0;
+    person -> maxFriends = 16;
+
+}
 
 int main(int argc, char *argv[]) {
     person_t *newPerson = (person_t *)malloc(sizeof(person_t));

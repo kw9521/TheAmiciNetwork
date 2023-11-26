@@ -223,8 +223,7 @@ void processCommands(bool isStdin, FILE *fp){
             } else {        
                 // command does not meet this: which consist solely of lowercase alphabetic characters. Commands appear only as the first token on an input line
 
-                
-                
+            
             }
             // subsequent calls to parse the same buffer
             token = strtok( NULL, DELIMITERS );
