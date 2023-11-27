@@ -178,6 +178,7 @@ void printCase(const HashADT table, const char *handle) {
             }
         }
     }
+
 }
 
 
@@ -251,7 +252,6 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                     }
                     
                 }
-            
                 
             } else if (strcmp(token, "init")){
                 // init
