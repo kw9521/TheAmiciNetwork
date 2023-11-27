@@ -108,9 +108,10 @@ bool areTheyFriendsAlr(const HashADT* table, const char *handle1, const char *ha
 
 void addFriends(const HashADT* table, const char *handle1, const char *handle2){
     person_t* p1 = (person_t*)ht_get(table, handle1);
+    person_t* p2 = (person_t*)ht_get(table, handle2);
 
-    // check if p1 exists
-    assert(p1 != NULL);
+    // check if p1 and p2 exists
+    assert(p1 != NULL && p2 != NULL);
 
     if (p1->numOfFriends >= p1->maxFriends) {
         size_t newSize = p1->maxFriends * 2;
@@ -121,8 +122,9 @@ void addFriends(const HashADT* table, const char *handle1, const char *handle2){
     }
     
     // Add the friend
-    p1->friends[p1->numOfFriends] = ht_get(table, handle2);
+    p1->friends[p1->numOfFriends] = p2;
     p1->numOfFriends++;
+
 }
 
 void initSystem(HashADT* table) {
@@ -151,7 +153,7 @@ void initSystem(HashADT* table) {
     numOfFriendShips = 0;
 
     // Create a new, empty hash table
-    *table = ht_create(str_hash, str_equals, print, delete);
+    *table = ht_create(str_hash, str_equals, NULL, NULL);
     printf("System re-initialized\n");
 }
 
@@ -333,8 +335,9 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                         addFriends(table, handle1, handle2);
                         addFriends(table, handle2, handle1);
 
+                        // update and print required output
                         numOfFriendShips++; 
-                        printf("%s and %s are now friends", handle1, handle2);
+                        printf("%s and %s are now friends.", handle1, handle2);
                     }
                     
                 }
@@ -451,7 +454,11 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                     
                     // handle1 and handle2 are VALID, are alphanumerical n starts with letter
                     // call unfriend func
-                    unfriend(table, handle1. handle2);
+                    unfriend(table, handle1, handle2);
+
+                    // update and print required output
+                    numOfFriendShips--; 
+                    printf("%s and %s no longer friends.", handle1, handle2);
 
                 }
                 
