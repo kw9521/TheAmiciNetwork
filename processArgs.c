@@ -204,6 +204,21 @@ void quitCase(HashADT* table) {
     exit(EXIT_SUCCESS);
 }
 
+
+void sizeCase(const HashADT* table, const char *handle){
+    person_t* person = (person_t*)ht_get(table, handle);
+
+    // Print the size of the friend list
+    printf("%s (%s %s) has ", handle, person->firstName, person->lastName);
+    if (person->numOfFriends == 0) {
+        printf("no friends\n");
+    } else if (person->numOfFriends == 1) {
+        printf("1 friend\n");
+    } else {
+        printf("%zu friends\n", person->numOfFriends);
+    }
+}
+
 void processCommands(bool isStdin, FILE *fp, HashADT* table){
     char buffer[256];
     while ((isStdin ? fgets(buffer, 256, stdin) : fgets(buffer, 256, fp)) != NULL) {
@@ -347,6 +362,7 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                 // handle (fname lname) has 1 friend
                 // handle (fname lname) has N friends
 
+                sizeCase(table, handle);
                 
             } else if (strcmp(token, "stats")){
                 // stats
