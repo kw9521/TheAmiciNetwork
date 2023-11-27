@@ -82,7 +82,7 @@ bool checkHandle(char* handle) {
     return true;
 }
 
-bool checkIfHandleExists(const HashADT table, const char *handle){
+bool checkIfHandleExists(const HashADT* table, const char *handle){
     if (ht_has(table, handle)) {
         return true;
     }
@@ -91,7 +91,7 @@ bool checkIfHandleExists(const HashADT table, const char *handle){
     
 }
 
-bool areTheyFriendsAlr(const HashADT table, const char *handle1, const char *handle2){
+bool areTheyFriendsAlr(const HashADT* table, const char *handle1, const char *handle2){
     person_t* p1 = (person_t*)ht_get(table,handle1);
 
     // check if p1 exists
@@ -105,7 +105,7 @@ bool areTheyFriendsAlr(const HashADT table, const char *handle1, const char *han
     return false; 
 }
 
-void addFriends(const HashADT table, const char *handle1, const char *handle2){
+void addFriends(const HashADT* table, const char *handle1, const char *handle2){
     person_t* p1 = (person_t*)ht_get(table, handle1);
 
     // check if p1 exists
@@ -150,7 +150,7 @@ void initSystem(HashADT* table) {
     numOfFriendShips = 0;
 
     // Create a new, empty hash table
-    *table = ht_create(str_hash,str_equals,print,delete);
+    *table = ht_create(hash,equal,print,delete);
     printf("System re-initialized\n");
 }
 
@@ -178,9 +178,31 @@ void printCase(const HashADT table, const char *handle) {
             }
         }
     }
-
 }
 
+void quitCase(HashADT* table) {
+    // Free all persons
+    void **allPersons = ht_values(*table);
+    if (allPersons != NULL) {
+        for (size_t i = 0; allPersons[i] != NULL; i++) {
+            person_t *person = (person_t *)allPersons[i];
+            free(person->friends);
+            free(person->handle);
+            free(person->firstName);
+            free(person->lastName);
+            free(person);
+        }
+        free(allPersons);
+    }
+
+    // Destroy the hash table
+    ht_destroy(*table);
+
+    // If there are other resources to free, do it here
+
+    // Exit the program
+    exit(EXIT_SUCCESS);
+}
 
 void processCommands(bool isStdin, FILE *fp, HashADT* table){
     char buffer[256];
@@ -307,6 +329,7 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                 } 
 
                 // otherwise, Clean up and delete all dynamic memory, and terminate with the EXIT_SUCCESS termination code
+                quitCase(table);
                 
             } else if (strcmp(token, "size")){
                 // size handle
