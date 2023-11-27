@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <ctype.h>      // for isalpha
 #include "HashADT.h"
+#include "Support.h"
 
 size_t numOfPplInNetwork = 0;
 size_t numOfFriendShips = 0;
@@ -150,7 +151,7 @@ void initSystem(HashADT* table) {
     numOfFriendShips = 0;
 
     // Create a new, empty hash table
-    *table = ht_create(hash,equal,print,delete);
+    *table = ht_create(str_hash, str_equals, print, delete);
     printf("System re-initialized\n");
 }
 
@@ -237,6 +238,35 @@ void stats(){
     }
 
 }
+
+void removeFriend(person_t* person, const char* handle) {
+    for (size_t i = 0; i < person->numOfFriends; i++) {
+        if (strcmp(person->friends[i]->handle, handle) == 0) {
+
+            // Shift the remaining elements left
+            for (size_t j = i; j < person->numOfFriends - 1; j++) {
+                person->friends[j] = person->friends[j + 1];
+            }
+            person->numOfFriends--;
+            break;
+        }
+    }
+}
+
+void unfriend(const HashADT* table, const char *handle1, const char *handle2) {
+    person_t* p1 = (person_t*)ht_get(table, handle1);
+    person_t* p2 = (person_t*)ht_get(table, handle2);
+
+    // Check if both handles exist in the table
+    assert(p1 != NULL && p2 != NULL);
+
+    // Remove each friend from the other's friend list
+    removeFriend(p1, handle2);
+    removeFriend(p2, handle1);
+
+    numOfFriendShips -= 1;
+}
+
 
 void processCommands(bool isStdin, FILE *fp, HashADT* table){
     char buffer[256];
@@ -421,6 +451,7 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                     
                     // handle1 and handle2 are VALID, are alphanumerical n starts with letter
                     // call unfriend func
+                    unfriend(table, handle1. handle2);
 
                 }
                 
