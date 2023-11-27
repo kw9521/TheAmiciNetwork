@@ -63,7 +63,7 @@ bool checkValidName(char* name) {
     return true;
 }
 
-bool checkHandle(char *handle) {
+bool checkHandle(char* handle) {
 
     // check if first letters is an alphabet character
     if (handle == NULL || !isalpha(handle[0])) {
@@ -122,33 +122,38 @@ void addFriends(const HashADT table, const char *handle1, const char *handle2){
     // Add the friend
     p1->friends[p1->numOfFriends] = ht_get(table, handle2);
     p1->numOfFriends++;
-
 }
 
-void initSystem(HashADT table) {
+void initSystem(HashADT* table) {
     // Get all values (persons) in the hash table
     void **allPersons = ht_values(table);
     if (allPersons != NULL) {
         for (size_t i = 0; allPersons[i] != NULL; i++) {
             person_t *person = (person_t *)allPersons[i];
-
             // Free the friends array
             free(person->friends);
-
             // Free the person struct itself
+            free(person -> handle);
+            free(person -> firstName);
+            free(person -> lastName);
             free(person);
         }
-
         // Free the array holding all persons
         free(allPersons);
     }
+
+    // Destroy the current hash table
+    ht_destroy(*table);
 
     // Reset global counts
     numOfPplInNetwork = 0;
     numOfFriendShips = 0;
 
+    // Create a new, empty hash table
+    *table = ht_create(str_hash,str_equals,print,delete);
     printf("System re-initialized\n");
 }
+
 
 void printCase(const HashADT table, const char *handle) {
     person_t *person = (person_t *)ht_get(table, handle);
@@ -176,7 +181,7 @@ void printCase(const HashADT table, const char *handle) {
 }
 
 
-void processCommands(bool isStdin, FILE *fp, HashADT table){
+void processCommands(bool isStdin, FILE *fp, HashADT* table){
     char buffer[256];
     while ((isStdin ? fgets(buffer, 256, stdin) : fgets(buffer, 256, fp)) != NULL) {
         char *token;
@@ -263,6 +268,7 @@ void processCommands(bool isStdin, FILE *fp, HashADT table){
                     // message: System re-initialized
 
                     initSystem(table);
+            
                 }
 
             } else if (strcmp(token, "print")){
@@ -366,7 +372,7 @@ void processCommands(bool isStdin, FILE *fp, HashADT table){
             }
             // subsequent calls to parse the same buffer
             token = strtok( NULL, DELIMSWITHNEWLINE );
+        }
     }
-}
 
 }
