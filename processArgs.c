@@ -219,6 +219,25 @@ void sizeCase(const HashADT* table, const char *handle){
     }
 }
 
+void stats(){
+    if(numOfPplInNetwork == 0){
+        printf("Statistics: 1 person, ");
+    } else if (numOfPplInNetwork == 1){
+        printf("Statistics: 1 person, ");
+    } else {
+        printf("Statistics: %d person, ", numOfPplInNetwork);
+    }
+
+    if(numOfFriendShips == 0){
+        printf("no friendships");
+    } else if (numOfFriendShips == 1){
+        printf("1 friendships");
+    } else {
+        printf("%d", numOfFriendShips);
+    }
+
+}
+
 void processCommands(bool isStdin, FILE *fp, HashADT* table){
     char buffer[256];
     while ((isStdin ? fgets(buffer, 256, stdin) : fgets(buffer, 256, fp)) != NULL) {
@@ -379,8 +398,9 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                 // network size is the total number of persons in the system
                 // number of friendships is the number created since the start
                 // Statistics: X people, Y friendships
+
+                stats();
     
-                
             } else if (strcmp(token, "unfriend")){
                 // unfriend  handle1  handle2
 
