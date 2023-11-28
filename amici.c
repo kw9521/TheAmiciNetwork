@@ -11,11 +11,14 @@
 #include <errno.h>      // for errno and ENOENT
 #include <string.h>     // for strtok and other string stuff
 #include "HashADT.h"
+#include "processArgs.h"
+#include "Support.h"
 
 int main(int argc, char *argv[]) {
     // if first command is ./amici (nothing)
     if (argc <= 1){
-        processCommands(true, NULL);
+        HashADT table = ht_create(str_hash, str_equals, print, delete);
+        processCommands(true, NULL, &table);
 
     } else {    // if first command is ./amici datafile.txt
         // read from file
@@ -29,23 +32,23 @@ int main(int argc, char *argv[]) {
 
         // otherwise open normally
         FILE *fp = fopen(argv[1], "r");
-        char buffer[256];
         if (fp == NULL){    // something wrong with opening
             if (errno == ENOENT) { 
                 // means file doesnt exit
                 // read commands from stdin
-                processCommands(true, NULL);
+                HashADT table = ht_create(str_hash, str_equals, print, delete);
+                processCommands(true, NULL, &table);
 
             } else {
                 // error occured
-                free(buffer);
                 perror("File not openable");
                 exit(EXIT_FAILURE);
             }
 
         } else {
             // can open file 
-            processCommands(false, fp);
+            HashADT table = ht_create(str_hash, str_equals, print, delete);
+            processCommands(true, NULL, &table);
 
         } 
     }

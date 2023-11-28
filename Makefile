@@ -1,5 +1,5 @@
 #
-# Created by gmakemake (Ubuntu Jul 25 2014) on Wed Nov 22 15:34:48 2023
+# Created by gmakemake (Ubuntu Jul 25 2014) on Mon Nov 27 17:54:19 2023
 #
 
 #
@@ -97,13 +97,13 @@ CLIBFLAGS = -L/home/course/csci243/pub/projects/02 -lhash -lm
 
 
 CPP_FILES =	
-C_FILES =	amici.c
+C_FILES =	Support.c amici.c processArgs.c
 PS_FILES =	
 S_FILES =	
-H_FILES =	HashADT.h
+H_FILES =	HashADT.h Support.h
 SOURCEFILES =	$(H_FILES) $(CPP_FILES) $(C_FILES) $(S_FILES)
 .PRECIOUS:	$(SOURCEFILES)
-OBJFILES =	
+OBJFILES =	Support.o processArgs.o 
 
 #
 # Main targets
@@ -118,7 +118,9 @@ amici:	amici.o $(OBJFILES)
 # Dependencies
 #
 
-amici.o:	
+Support.o:	Support.h
+amici.o:	HashADT.h
+processArgs.o:	HashADT.h Support.h
 
 #
 # Housekeeping
