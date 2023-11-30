@@ -14,11 +14,14 @@
 #include "processArgs.h"
 #include "Support.h"
 
+// run valgrind using valgrind --leak-check=full --log-file=errors.txt ./RUN
 int main(int argc, char *argv[]) {
     // if first command is ./amici (nothing)
     if (argc <= 1){
         HashADT table = ht_create(str_hash, str_equals, print, delete);
         processCommands(true, NULL, &table);
+        quitCase(table);
+        
 
     } else {    // if first command is ./amici datafile.txt
         // read from file
@@ -38,6 +41,7 @@ int main(int argc, char *argv[]) {
                 // read commands from stdin
                 HashADT table = ht_create(str_hash, str_equals, print, delete);
                 processCommands(true, NULL, &table);
+                quitCase(table);
 
             } else {
                 // error occured
@@ -48,8 +52,8 @@ int main(int argc, char *argv[]) {
         } else {
             // can open file 
             HashADT table = ht_create(str_hash, str_equals, print, delete);
-            processCommands(true, NULL, &table);
-
+            processCommands(false, fp, &table);
+            quitCase(table);
         } 
     }
 }

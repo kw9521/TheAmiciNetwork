@@ -26,29 +26,34 @@ typedef struct person_s {
     char *handle;               // handle of the person
     struct person_s **friends;  // dynamic collection of friends
     size_t numOfFriends;        // number of friendships 
-    size_t maxFriends;          // current limit on friends, need if ur using dynamic array that doubles in size everytme the array is full
+    size_t maxFriends;    // current limit on friends, need if ur using dynamic array that doubles in size everytme the array is full
 } person_s;
 
 person_t makePerson(char* firstName, char* lastName, char* handle){
-
     person_s * person = (person_s*)malloc(sizeof(person_s));
 
     // check if memeory was correctly allocated
-    assert(person != NULL);
+    assert(person != NULL && firstName != NULL && lastName !=NULL && handle !=NULL);
 
+    person -> maxFriends = 100;
     person -> firstName = firstName;
     person -> lastName = lastName;
     person -> handle = handle;
-    person -> friends = (person_s**)malloc((person -> maxFriends)* sizeof(person_s*));
+    person-> friends = (person_s**)malloc(person->maxFriends * sizeof(person_s*));
+    assert(person-> friends != NULL);
     person -> numOfFriends = 0;
-    person -> maxFriends = 100;
 
     // increase the num of people made 
+    printf("firstname: %s, lastname: %s, handle: %s\n", firstName, lastName, handle);
     numOfPplInNetwork++;
     return person;
 }
 
 bool checkValidName(char* name) {
+
+    if(name == NULL){
+        return false;
+    }
 
     // check if first letters is an alphabet character
     if (name == NULL || !isalpha(name[0])) {
@@ -57,7 +62,7 @@ bool checkValidName(char* name) {
     }
 
     // checks if alphabetic characters (uppercase and lowercase) along with the apostrophe ('\'') and hyphen ('-') characters
-    for (int i = 1; name[i] != '\0'; i++) {
+    for (int i = 0; name[i] != '\0'; i++) {
         if (!isalpha(name[i]) && name[i] != '\'' && name[i] != '-') {
             printf("error: argument \"%s\" is invalid\n", name);
             return false;
@@ -69,6 +74,10 @@ bool checkValidName(char* name) {
 
 bool checkHandle(char* handle) {
 
+    if(handle == NULL){
+        return false;
+    }
+
     // check if first letters is an alphabet character
     if (handle == NULL || !isalpha(handle[0])) {
         printf("error: argument \"%s\" is invalid\n", handle);
@@ -76,7 +85,7 @@ bool checkHandle(char* handle) {
     }
 
     // checks if handle consist of alphanumeric characters 
-    for (int i = 1; handle[i] != '\0'; i++) {
+    for (int i = 0; handle[i] != '\0'; i++) {
         if (!isalnum(handle[i])) {
             printf("error: argument \"%s\" is invalid\n", handle);
             return false;
@@ -86,7 +95,23 @@ bool checkHandle(char* handle) {
     return true;
 }
 
+void checkHandlesInTble(const HashADT table){
+    void **keys = ht_keys(table);
+
+        printf("Current handles in the table:\n");
+        for (size_t i = 0; keys[i] != NULL; i++) {
+            printf("%s, ", (char *)keys[i]);
+        }
+
+        // Free the dynamically allocated array of keys
+        free(keys);
+}
+
 bool checkIfHandleExists(const HashADT table, const char *handle){
+
+    // for testing:
+    checkHandlesInTble(table);
+
     if (ht_has(table, handle)) {
         return true;
     }
@@ -227,11 +252,11 @@ void sizeCase(const HashADT table, const char *handle){
 
 void stats(){
     if(numOfPplInNetwork == 0){
-        printf("Statistics: 1 person, ");
+        printf("Statistics:  no people, ");
     } else if (numOfPplInNetwork == 1){
-        printf("Statistics: 1 person, ");
+        printf("Statistics:  1 person, ");
     } else {
-        printf("Statistics: %ld person, ", numOfPplInNetwork);
+        printf("Statistics:  %ld people, ", numOfPplInNetwork);
     }
 
     if(numOfFriendShips == 0){
@@ -295,26 +320,38 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
         // first call specifies the buffer to be parsed
         // gets rid of space, tabs and new lines
         token = strtok( buffer, DELIMSWITHNEWLINE );   
+    
 
+        if(isStdin){
+            printf("Amici> ");
+        }
         while (token != NULL) {
-
-            if (strcmp(token, "add")){
+            
+            // if token and "add" are equal, strcmp returns 0, if, so !strcmp will be true
+            if (!strcmp(token, "add")){
                 // add  first-name  last-name  handle              
             
                 char * firstName = strtok( NULL, DELIMITERS );
                 char * lastName = strtok( NULL, DELIMITERS );
-                char * handle = strtok( NULL, DELIMITERS );
+                char * handle = strtok( NULL, DELIMSWITHNEWLINE );
                 char * extras = strtok( NULL, DELIMITERS );
 
+                if(firstName != NULL && lastName != NULL && handle != NULL && extras == NULL){
+                    printf("+ \"add\" \"%s\" \"%s\" \"%s\"\n", firstName, lastName, handle);
+                }
 
                 // checks firstName, lastName, handle is NOT NULL, checks of extras IS NULL
                 // if any of these are true, it means there is too few args or too much args
-                if (firstName == NULL || lastName == NULL|| handle == NULL || (extras != NULL && extras[0] != '#')) {
+                if (firstName == NULL || lastName == NULL || handle == NULL || (extras != NULL && extras[0] != '#')) {
                     printf("error: usage: add first-name last-name handle\n");
-                }
+                } 
 
                 if (checkValidName(firstName) && checkValidName(lastName) && checkHandle(handle)) {
                     
+
+                    // HT_HAS IS NOT WORKING 
+
+
                     // check if handle is alr in data base, if so print error
                     if(ht_has(*table, handle)){
                         printf("error: handle \"%s\" is already in use\n", handle);
@@ -326,17 +363,21 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                 }
 
                 
-            } else if (strcmp(token, "friend")){
+            } else if (!strcmp(token, "friend")){
                 // friend  handle1  handle2
 
                 char * handle1 = strtok( NULL, DELIMITERS );
-                char * handle2 = strtok( NULL, DELIMITERS );
+                char * handle2 = strtok( NULL, DELIMSWITHNEWLINE );
                 char * extras = strtok( NULL, DELIMITERS );
                 
+                if(handle1 != NULL && handle1 != NULL && handle2 != NULL && extras == NULL){
+                    printf("+ \"friend\" \"%s\" \"%s\"\n", handle1, handle2);
+                }
+
                 // checks to make sure handle1 and handle1 are valid and that extras is NULL
                 // if any of these are false, there are too few or too many args 
                 if(handle1 == NULL || handle2 == NULL|| (extras != NULL && extras[0] != '#')){
-                    printf("error: usage: friend  handle1  handle2\n");
+                    printf("error: usage: friend handle1 handle2\n");
                 } 
 
                 // check if handle1 and handle2 are part of the database!!!!!
@@ -359,10 +400,14 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                     
                 }
                 
-            } else if (strcmp(token, "init")){
+            } else if (!strcmp(token, "init")){
                 // init
 
                 char * extras = strtok( NULL, DELIMITERS );
+
+                if(extras == NULL){
+                    printf("+ \"init\"\n");
+                }
 
                 // if there are args after "init" command, its an error
                 if ((extras != NULL && extras[0] != '#')){
@@ -377,11 +422,15 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
             
                 }
 
-            } else if (strcmp(token, "print")){
+            } else if (!strcmp(token, "print")){
                 // print handle
 
-                char * handle = strtok( NULL, DELIMITERS );
+                char * handle = strtok( NULL, DELIMSWITHNEWLINE );
                 char * extras = strtok( NULL, DELIMITERS );
+
+                if(handle != NULL && extras == NULL){
+                    printf("+ \"print\" \"%s\"\n", handle);
+                }
 
                 // check for valid amount of arguments
                 if (handle == NULL || (extras != NULL && extras[0] != '#')){
@@ -398,50 +447,63 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                     // eg: abe (A Lincoln) has 3 friends
 	                //          anthony (A Blinken)
                     printCase(*table, handle);
-                
                 } 
                 
                 
-            } else if (strcmp(token, "quit")){
+            } else if (!strcmp(token, "quit")){
                 // quit
 
                 char * extras = strtok( NULL, DELIMITERS );
 
+                if(extras == NULL){
+                    printf("+ \"quit\"\n");
+                }
+
                 // if there are args after "quit" command, its an error
                 if ((extras != NULL && extras[0] != '#')){
                     printf("error: usage: quit\n");
-                } 
+                } else {
+                    // otherwise, Clean up and delete all dynamic memory, and terminate with the EXIT_SUCCESS termination code
+                    quitCase(*table);                  
+                }
 
-                // otherwise, Clean up and delete all dynamic memory, and terminate with the EXIT_SUCCESS termination code
-                quitCase(*table);
-                
-            } else if (strcmp(token, "size")){
+
+            
+            } else if (!strcmp(token, "size")){     // SEG FAULT HEREEEEE
                 // size handle
-                char * handle = strtok( NULL, DELIMITERS );
+                char * handle = strtok( NULL, DELIMSWITHNEWLINE );
                 char * extras = strtok( NULL, DELIMITERS );
+
+                if(handle != NULL && extras == NULL){
+                    printf("+ \"size\" \"%s\"\n", handle);
+                }
                 
                 // check for valid amount of arguments
                 if (handle == NULL || (extras != NULL && extras[0] != '#')){
                     printf("error: usage: size handle\n");
+                } else {
+                    // otherwise...
+                    // Compute and print the size of (i.e., the number of entries in) the friend list for that user, using one of the following formats according to the number of friends
+                    // handle (fname lname) has no friends
+                    // handle (fname lname) has 1 friend
+                    // handle (fname lname) has N friends
+                    sizeCase(*table, handle);
                 }
-
-                // otherwise...
-                // Compute and print the size of (i.e., the number of entries in) the friend list for that user, using one of the following formats according to the number of friends
-                // handle (fname lname) has no friends
-                // handle (fname lname) has 1 friend
-                // handle (fname lname) has N friends
-
-                sizeCase(*table, handle);
                 
-            } else if (strcmp(token, "stats")){
+            } else if (!strcmp(token, "stats")){
                 // stats
                 
                 char * extras = strtok( NULL, DELIMITERS );
+                if(extras == NULL){
+                    printf("+ \"stats\"\n");
+                }
 
                 // if there are args after "quit" command, its an error
                 if ((extras != NULL && extras[0] != '#')){
                     printf("error: usage: stats\n");
-                } 
+                } else {
+                    stats();
+                }
 
                 // otherwise...
                 // Print two values: the size of the network and the number of friendships
@@ -449,19 +511,22 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                 // number of friendships is the number created since the start
                 // Statistics: X people, Y friendships
 
-                stats();
     
-            } else if (strcmp(token, "unfriend")){
+            } else if (!strcmp(token, "unfriend")){
                 // unfriend  handle1  handle2
 
                 char * handle1 = strtok( NULL, DELIMITERS );
-                char * handle2 = strtok( NULL, DELIMITERS );
+                char * handle2 = strtok( NULL, DELIMSWITHNEWLINE );
                 char * extras = strtok( NULL, DELIMITERS );
+
+                if(handle1 != NULL && handle2 != NULL && extras == NULL){
+                    printf("+ \"unfriend\" \"%s\" \"%s\"\n", handle1, handle2);
+                }
                 
                 // checks to make sure handle1 and handle1 are valid and that extras is NULL
                 // if any of these are false, there are too few or too many args 
                 if(handle1 == NULL || handle2 == NULL|| (extras != NULL && extras[0] != '#')){
-                    printf("error: usage: unfriend  handle1  handle2\n");
+                    printf("error: usage: unfriend handle1 handle2\n");
                 } 
 
                 // check if handle1 and handle2 are even friends in the first place!!!!!
@@ -479,19 +544,15 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
 
                 }
                 
-            } else {        
+            } else if (strcmp(token, "\0")) {        
                 // command does not meet this: which consist solely of lowercase alphabetic characters. Commands appear only as the first token on an input line
-
-            
+                break;;
+            } else {
+                continue;
             }
             // subsequent calls to parse the same buffer
             token = strtok( NULL, DELIMSWITHNEWLINE );
         }
-
-        if(isStdin){
-            printf("Amici> ");
-        }
-
     }
 
 }

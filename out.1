@@ -1,29 +1,21 @@
-error: usage: friend  handle1  handle2
-error: argument "(null)" is invalid
-error: usage: friend  handle1  handle2
+Amici> error: usage: add first-name last-name handle
+Amici> + "add" "John" "Smith," "smitty"
 error: argument "Smith," is invalid
-error: usage: friend  handle1  handle2
+Amici> + "add" "Edith" "Smith," "smitty"
 error: argument "Smith," is invalid
-error: usage: friend  handle1  handle2
+Amici> + "add" "Mr" "Ed," "horse"
 error: argument "Ed," is invalid
-error: usage: add first-name last-name handle
-error: argument "(null)" is invalid
-error: usage: add first-name last-name handle
-error: argument "horse
-" is invalid
-error: usage: add first-name last-name handle
-error: argument "(null)" is invalid
-error: usage: add first-name last-name handle
-error: argument "(null)" is invalid
-error: usage: add first-name last-name handle
-error: argument "(null)" is invalid
-error: usage: add first-name last-name handle
-error: argument "(null)" is invalid
-error: usage: add first-name last-name handle
-error: argument "(null)" is invalid
-error: argument "ignored
-" is invalid
-error: usage: add first-name last-name handle
-error: argument "(null)" is invalid
-error: usage: add first-name last-name handle
-error: argument "(null)" is invalid
+Amici> error: usage: friend handle1 handle2
+Amici> + "friend" "smitty" "horse"
+Current handles in the table:
+error: handle "smitty" is unknown
+Amici> error: usage: unfriend handle1 handle2
+Amici> error: usage: print handle
+Amici> error: usage: size handle
+Amici> + "stats"
+Statistics:  no people, no friendships
+Amici> + "init"
+System re-initialized
+Amici> Amici> + "stats"
+Statistics:  no people, no friendships
+Amici> + "quit"
