@@ -35,10 +35,18 @@ person_t makePerson(char* firstName, char* lastName, char* handle){
     // check if memeory was correctly allocated
     assert(person != NULL && firstName != NULL && lastName !=NULL && handle !=NULL);
 
-    person -> maxFriends = 100;
+    person -> maxFriends = 10;
+    person -> firstName = (char*)malloc(strlen(firstName) * sizeof(char));
+
+    assert(person -> firstName != NULL);    
     person -> firstName = firstName;
+    
+    person -> lastName = (char*)malloc(strlen(firstName) * sizeof(char));
+    assert(person -> lastName != NULL);
     person -> lastName = lastName;
+
     person -> handle = handle;
+
     person-> friends = (person_s**)malloc(person->maxFriends * sizeof(person_s*));
     assert(person-> friends != NULL);
     person -> numOfFriends = 0;
@@ -62,7 +70,7 @@ bool checkValidName(char* name) {
     }
 
     // checks if alphabetic characters (uppercase and lowercase) along with the apostrophe ('\'') and hyphen ('-') characters
-    for (int i = 0; name[i] != '\0'; i++) {
+    for (int i = 0; i< strlen(name); i++) {
         if (!isalpha(name[i]) && name[i] != '\'' && name[i] != '-') {
             printf("error: argument \"%s\" is invalid\n", name);
             return false;
@@ -85,7 +93,7 @@ bool checkHandle(char* handle) {
     }
 
     // checks if handle consist of alphanumeric characters 
-    for (int i = 0; handle[i] != '\0'; i++) {
+    for (size_t i = 0; i< strlen(handle); i++) {
         if (!isalnum(handle[i])) {
             printf("error: argument \"%s\" is invalid\n", handle);
             return false;
@@ -98,13 +106,14 @@ bool checkHandle(char* handle) {
 void checkHandlesInTble(const HashADT table){
     void **keys = ht_keys(table);
 
-        printf("Current handles in the table:\n");
-        for (size_t i = 0; keys[i] != NULL; i++) {
-            printf("%s, ", (char *)keys[i]);
-        }
+    printf("Current handles in the table:\n");
+    for (size_t i = 0; keys[i] != NULL; i++) {
+        printf("%s, ", (char *)keys[i]);
+        free(keys[i]);
+    }
 
-        // Free the dynamically allocated array of keys
-        free(keys);
+    // Free the dynamically allocated array of keys
+    free(keys);
 }
 
 bool checkIfHandleExists(const HashADT table, const char *handle){
@@ -114,56 +123,83 @@ bool checkIfHandleExists(const HashADT table, const char *handle){
 
     if (ht_has(table, handle)) {
         return true;
+    } else {
+        printf("error: handle \"%s\" is unknown\n", handle);
+        return false; 
     }
-    printf("error: handle \"%s\" is unknown\n", handle);
-    return false; 
+}
+
+// @return false if handle1 and handle2 are the same, true if it is not same person
+bool notSamePerson(const char *handle1, const char *handle2){
+    if (str_equals(handle1, handle2)){
+        printf("error: \"%s\" and \"%s\" are the same person\n", handle1, handle2);
+        return false;
+    } else {
+        return true; 
+    }
     
 }
 
+void freePersonS(person_t person){
+    for (size_t i = 0; i < person->numOfFriends; i++) {
+        free(person -> friends[i]);
+    }
+    free(person -> friends);
+    free(person -> handle);
+    free(person -> firstName);
+    free(person -> lastName);
+    free(person);
+}
+
+/// @return true if handle1 and handle2 ARE friends, false otherwise
 bool areTheyFriendsAlr(const HashADT table, const char *handle1, const char *handle2){
-    person_s* p1 = (person_s*)ht_get(table,handle1);
+    person_t p1 = (person_s*)ht_get(table,handle1);
 
     // check if p1 exists
     assert(p1 != NULL);
 
     for (size_t i = 0; i < p1->numOfFriends; i++) {
-        if(p1->friends[i] != NULL && strcmp(p1->friends[i]->handle, handle2) == 0){
+        if(str_equals(p1 -> friends[i] -> handle, handle2)){
             return true;
         } 
-    } 
+    }
     return false; 
 }
 
 void addFriends(const HashADT table, const char *handle1, const char *handle2){
-    person_s* p1 = (person_s*)ht_get(table, handle1);
-    person_s* p2 = (person_s*)ht_get(table, handle2);
+    person_t p1 = (person_t)ht_get(table, handle1);
 
     // check if p1 and p2 exists
-    assert(p1 != NULL && p2 != NULL);
+    assert(p1 != NULL);
 
+    // realloc more memory if needed
     if (p1->numOfFriends >= p1->maxFriends) {
         size_t newSize = p1->maxFriends * 2;
-        p1->friends = (person_s **)realloc(p1->friends, newSize * sizeof(person_s *));
+        person_s **newFriends = (person_s **)realloc(p1->friends, newSize * sizeof(person_s *));
         
-        assert(p1->friends != NULL);
+        assert(newFriends != NULL);
+        
+        // Initialize new memory to NULL
+        memset(newFriends + p1->maxFriends, 0, (newSize - p1->maxFriends) * sizeof(person_s *));
+
+        p1->friends = newFriends;
         p1->maxFriends = newSize;
     }
-    
+
     // Add the friend
-    p1->friends[p1->numOfFriends] = p2;
+    p1->friends[p1->numOfFriends] = (person_t)ht_get(table, handle2);
     p1->numOfFriends++;
 
 }
 
-void initSystem(HashADT table) {
+void freeAllValuesInHashTable(HashADT table){
     // Get all values (persons) in the hash table
     void **allPersons = ht_values(table);
     if (allPersons != NULL) {
         for (size_t i = 0; allPersons[i] != NULL; i++) {
             person_s *person = (person_s *)allPersons[i];
             // Free the friends array
-            free(person->friends);
-            // Free the person struct itself
+            free(person -> friends);
             free(person -> handle);
             free(person -> firstName);
             free(person -> lastName);
@@ -172,9 +208,14 @@ void initSystem(HashADT table) {
         // Free the array holding all persons
         free(allPersons);
     }
+}
+
+void initSystem(HashADT* table) {
+    
+    // freeAllValuesInHashTable(table);
 
     // Destroy the current hash table
-    ht_destroy(table);
+    ht_destroy(*table);
 
     // Reset global counts
     numOfPplInNetwork = 0;
@@ -187,7 +228,7 @@ void initSystem(HashADT table) {
 
 
 void printCase(const HashADT table, const char *handle) {
-    person_s *person = (person_s *)ht_get(table, handle);
+    person_t person = (person_s *)ht_get(table, handle);
     
     // Check if the person exists
     if (person == NULL) {
@@ -212,32 +253,17 @@ void printCase(const HashADT table, const char *handle) {
 }
 
 void quitCase(HashADT table) {
-    // Free all persons
-    void **allPersons = ht_values(table);
-    if (allPersons != NULL) {
-        for (size_t i = 0; allPersons[i] != NULL; i++) {
-            person_s *person = (person_s *)allPersons[i];
-            free(person->friends);
-            free(person->handle);
-            free(person->firstName);
-            free(person->lastName);
-            free(person);
-        }
-        free(allPersons);
-    }
+    // freeAllValuesInHashTable(table);
 
     // Destroy the hash table
     ht_destroy(table);
-
-    // If there are other resources to free, do it here
 
     // Exit the program
     exit(EXIT_SUCCESS);
 }
 
-
 void sizeCase(const HashADT table, const char *handle){
-    person_s* person = (person_s*)ht_get(table, handle);
+    person_t person = (person_s*)ht_get(table, handle);
 
     // Print the size of the friend list
     printf("%s (%s %s) has ", handle, person->firstName, person->lastName);
@@ -248,6 +274,7 @@ void sizeCase(const HashADT table, const char *handle){
     } else {
         printf("%zu friends\n", person->numOfFriends);
     }
+
 }
 
 void stats(){
@@ -284,8 +311,8 @@ void removeFriend(person_t person, const char* handle) {
 }
 
 void unfriend(const HashADT table, const char *handle1, const char *handle2) {
-    person_s* p1 = (person_s*)ht_get(table, handle1);
-    person_s* p2 = (person_s*)ht_get(table, handle2);
+    person_t p1 = (person_s*)ht_get(table, handle1);
+    person_t p2 = (person_s*)ht_get(table, handle2);
 
     // Check if both handles exist in the table
     assert(p1 != NULL && p2 != NULL);
@@ -299,16 +326,18 @@ void unfriend(const HashADT table, const char *handle1, const char *handle2) {
 
 void delete( void *key, void *value ){
     (void)key;
-    person_s * person = (person_t) value;
+    person_t person = (person_t)value;
     assert(person -> friends != NULL);
     free(person->friends);
     free(person);
+    // freePersonS(person);
 }
 
 void print( const void *key, const void *value ){
     (void)key;
-    person_s* person = (person_t) value;
+    person_t person = (person_t) value;
     printf("%s (%s %s)\n", person->handle,person->firstName,person->lastName);
+    // freePersonS(person);
 }
 
 
@@ -383,7 +412,7 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                 // check if handle1 and handle2 are part of the database!!!!!
                 // if not, print... printf("error: handle "%s" is unknown", handle1/handle2);
                 
-                if (checkHandle(handle1) && checkHandle(handle2) && checkIfHandleExists(*table, handle1) && checkIfHandleExists(*table, handle2)){
+                if (checkHandle(handle1) && checkHandle(handle2) && checkIfHandleExists(*table, handle1) && checkIfHandleExists(*table, handle2) && notSamePerson(handle1, handle2)){
                     
                     // check if they're alr friends, if not make then friends
                     // otherwise print error message 
@@ -396,6 +425,7 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                         // update and print required output
                         numOfFriendShips++; 
                         printf("%s and %s are now friends.\n", handle1, handle2);
+                        
                     }
                     
                 }
@@ -466,10 +496,8 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                     // otherwise, Clean up and delete all dynamic memory, and terminate with the EXIT_SUCCESS termination code
                     quitCase(*table);                  
                 }
-
-
             
-            } else if (!strcmp(token, "size")){     // SEG FAULT HEREEEEE
+            } else if (!strcmp(token, "size")){     
                 // size handle
                 char * handle = strtok( NULL, DELIMSWITHNEWLINE );
                 char * extras = strtok( NULL, DELIMITERS );
@@ -546,7 +574,7 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
                 
             } else if (strcmp(token, "\0")) {        
                 // command does not meet this: which consist solely of lowercase alphabetic characters. Commands appear only as the first token on an input line
-                break;;
+                break;
             } else {
                 continue;
             }

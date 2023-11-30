@@ -1,0 +1,89 @@
+commit 57e73e5fe6833c615e0b4089d09448d3cca7f020
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Thu Nov 30 00:32:18 2023 -0500
+
+    matched input.1
+
+commit 46be2a6ba8fe3f174a47e9d71745d90e2540b4c9
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Mon Nov 27 23:06:22 2023 -0500
+
+    compiles without errors
+
+commit a854ea4e654ee369d578bfa5fdaff9d4925f673c
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Mon Nov 27 15:48:07 2023 -0500
+
+    updated addFriends()
+
+commit a7dff278c935afcbab6271871511d7c830ce347c
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Mon Nov 27 15:39:28 2023 -0500
+
+    unfriend case added
+
+commit 9f33b4e3b47fce05ccd585426640cfdbaaa608ff
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Mon Nov 27 15:07:27 2023 -0500
+
+    stats case added
+
+commit 0cac2213ae2926f8b32f2ddd69cba050119d23e1
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Mon Nov 27 14:48:17 2023 -0500
+
+    size case added
+
+commit 74bd2741ed609c079d6cd299cdec63a12dd8e285
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Mon Nov 27 14:45:13 2023 -0500
+
+    quit case added
+
+commit 491689a542f677c610744f82e06cea746f39eaea
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Mon Nov 27 14:06:00 2023 -0500
+
+    print case added
+
+commit b6833328920ba3c0306fb63182dc46e3cd9f9d19
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Mon Nov 27 00:25:42 2023 -0500
+
+    init command added
+
+commit a88835cf97f6317a8bb92a14d4318bb83a03b878
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Sun Nov 26 17:30:23 2023 -0500
+
+     print case added
+
+commit 2139568794bbf9b0d10f73d021008f012cca56e5
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Sun Nov 26 16:40:39 2023 -0500
+
+    finished friend and init command
+
+commit ee9bd9cd4cf3375307117f395ab700536d27fc9b
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Sun Nov 26 16:11:14 2023 -0500
+
+    finished add command
+
+commit 0afab4ea46f6697a1b02e4634109e9489fa35c2b
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Sat Nov 25 23:00:20 2023 -0500
+
+    added makePerson() to initialize every new person added into system
+
+commit 3c91d0b4e4ac53c27f5d7bcaf7e4410549f82618
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Sat Nov 25 00:01:38 2023 -0500
+
+    added error handling cases
+
+commit ccd117b01937b035c4c7543d7821f11881def981
+Author: Kunlin Wen <kw9521@cs.rit.edu>
+Date:   Thu Nov 23 15:37:24 2023 -0500
+
+    initial commit

@@ -20,7 +20,6 @@ int main(int argc, char *argv[]) {
     if (argc <= 1){
         HashADT table = ht_create(str_hash, str_equals, print, delete);
         processCommands(true, NULL, &table);
-        quitCase(table);
         
 
     } else {    // if first command is ./amici datafile.txt
@@ -41,11 +40,11 @@ int main(int argc, char *argv[]) {
                 // read commands from stdin
                 HashADT table = ht_create(str_hash, str_equals, print, delete);
                 processCommands(true, NULL, &table);
-                quitCase(table);
-
+                fclose(fp);
             } else {
                 // error occured
                 perror("File not openable");
+                fclose(fp);
                 exit(EXIT_FAILURE);
             }
 
@@ -53,7 +52,7 @@ int main(int argc, char *argv[]) {
             // can open file 
             HashADT table = ht_create(str_hash, str_equals, print, delete);
             processCommands(false, fp, &table);
-            quitCase(table);
+            fclose(fp);
         } 
     }
 }

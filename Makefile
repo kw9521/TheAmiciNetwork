@@ -1,5 +1,5 @@
 #
-# Created by gmakemake (Ubuntu Jul 25 2014) on Mon Nov 27 17:54:19 2023
+# Created by gmakemake (Ubuntu Jul 25 2014) on Thu Nov 30 12:34:39 2023
 #
 
 #
@@ -100,7 +100,7 @@ CPP_FILES =
 C_FILES =	Support.c amici.c processArgs.c
 PS_FILES =	
 S_FILES =	
-H_FILES =	HashADT.h Support.h
+H_FILES =	HashADT.h Support.h processArgs.h
 SOURCEFILES =	$(H_FILES) $(CPP_FILES) $(C_FILES) $(S_FILES)
 .PRECIOUS:	$(SOURCEFILES)
 OBJFILES =	Support.o processArgs.o 
@@ -119,8 +119,8 @@ amici:	amici.o $(OBJFILES)
 #
 
 Support.o:	Support.h
-amici.o:	HashADT.h
-processArgs.o:	HashADT.h Support.h
+amici.o:	HashADT.h Support.h processArgs.h
+processArgs.o:	HashADT.h Support.h processArgs.h
 
 #
 # Housekeeping
