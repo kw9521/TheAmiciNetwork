@@ -16,7 +16,7 @@
 #include "processArgs.h"
 #include "Support.h"
 
-run valgrind using valgrind --leak-check=full --log-file=errors.txt ./RUN
+// run valgrind using valgrind --leak-check=full --log-file=errors.txt ./RUN
 int main(int argc, char *argv[]) {
     HashADT table = ht_create(str_hash, str_equals, print, delete);
 

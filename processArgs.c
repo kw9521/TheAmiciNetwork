@@ -291,7 +291,7 @@ void stats(){
     if(numOfFriendShips == 0){
         printf("no friendships\n");
     } else if (numOfFriendShips == 1){
-        printf("1 friendships\n");
+        printf("1 friendship\n");
     } else {
         printf("%ld friendships\n", numOfFriendShips);
     }
