@@ -1,28 +1,31 @@
 /// @file amici.c
 /// @author Kunlin Wen, kw9521
 
-#define DELIMITERS   " \t\n"        // separate tokens using whitespace
-#define _DEFAULT_SOURCE             // must be before all #include to be able to use getline()
+#define DELIMS " \t\n"
 
 #include <stddef.h>     // for size_t
 #include <stdio.h>      // for I/O operations
 #include <stdlib.h>     // for dynamic memory
-#include <stdbool.h>
 #include <errno.h>      // for errno and ENOENT
 #include <string.h>     // for strtok and other string stuff
+#include <stdbool.h>
+#include <ctype.h>      // for isalpha()
+#include <assert.h>     // for assert()
+
 #include "HashADT.h"
 #include "processArgs.h"
 #include "Support.h"
 
-// run valgrind using valgrind --leak-check=full --log-file=errors.txt ./RUN
+run valgrind using valgrind --leak-check=full --log-file=errors.txt ./RUN
 int main(int argc, char *argv[]) {
+    HashADT table = ht_create(str_hash, str_equals, print, delete);
+
     // if first command is ./amici (nothing)
     if (argc <= 1){
-        HashADT table = ht_create(str_hash, str_equals, print, delete);
         processCommands(true, NULL, &table);
-        
 
-    } else {    // if first command is ./amici datafile.txt
+    } else {    
+        // if first command is ./amici datafile.txt
         // read from file
 
         // Should the command line contain more than one argument after the command name itself, print a usage message 
@@ -30,29 +33,21 @@ int main(int argc, char *argv[]) {
         if(argc >=3){
             fprintf(stderr, "usage: amici [ %s ]", argv[1]);
             exit(EXIT_FAILURE);
-        } 
-
-        // otherwise open normally
-        FILE *fp = fopen(argv[1], "r");
-        if (fp == NULL){    // something wrong with opening
-            if (errno == ENOENT) { 
-                // means file doesnt exit
-                // read commands from stdin
-                HashADT table = ht_create(str_hash, str_equals, print, delete);
-                processCommands(true, NULL, &table);
-                fclose(fp);
-            } else {
+        } else {
+            // otherwise open normally
+            FILE *fp = fopen(argv[1], "r");
+            if (fp == NULL){    // something wrong with opening
                 // error occured
-                perror("File not openable");
+                perror(argv[1]);
                 fclose(fp);
                 exit(EXIT_FAILURE);
-            }
-
-        } else {
-            // can open file 
-            HashADT table = ht_create(str_hash, str_equals, print, delete);
-            processCommands(false, fp, &table);
-            fclose(fp);
-        } 
+            } else {
+                // can open file 
+                processCommands(false, fp, &table);
+                fclose(fp);
+                // process commmand line inputs after reading file
+                processCommands(true, fp, &table);
+            } 
+        }
     }
 }
