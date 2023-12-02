@@ -1,4 +1,6 @@
-/// @file processArgs
+/// CSCI-243: The Mechanics of Programming Project 2: The Amici Network
+/// this file processes the file or commandline arguments and calculates whatever is being read/passed in
+/// @file processArgs.c
 /// @author Kunlin Wen, kw9521
 
 #define _DEFAULT_SOURCE             // must be before all #include to be able to use getline()
@@ -20,34 +22,34 @@
 size_t numOfPplInNetwork = 0;
 size_t numOfFriendShips = 0;
 
+/// Creates a new person_t structure and initializes it with given names and handle
+/// Allocates memory for the person and their friends list
+/// @param firstName first name of the person
+/// @param lastName last name of the person
+/// @param handle unique handle to identify the person
 person_t* makePerson(char* firstName, char* lastName, char* handle){
     person_t * person = (person_t*)malloc(sizeof(person_t));
 
     // check if memeory was correctly allocated
     assert(person != NULL && firstName != NULL && lastName !=NULL && handle !=NULL);
 
-    person -> maxFriends = 10;
-
-    // person -> firstName = (char*)malloc(strlen(firstName) * sizeof(char));
-    // assert(person -> firstName != NULL);    
+    person -> maxFriends = 10;  
     person -> firstName = firstName;
-    
-    // person -> lastName = (char*)malloc(strlen(firstName) * sizeof(char));
-    // assert(person -> lastName != NULL);
     person -> lastName = lastName;
-
     person -> handle = handle;
 
-    person-> friends = (person_t**)malloc((person->maxFriends) * sizeof(person_t*));
+    person-> friends = (person_t**)malloc((person->maxFriends)*sizeof(person_t*));
     assert(person-> friends != NULL);
     person -> numOfFriends = 0;
 
-    // increase the num of people made 
-    // printf("firstname: %s, lastname: %s, handle: %s\n", firstName, lastName, handle);
     numOfPplInNetwork++;
     return person;
 }
 
+/// Checks if the given name is valid. 
+/// A valid name starts with an alphabetic character and can contain alphabetic characters, apostrophes, and hyphens
+/// @param name name to be checked
+/// @return true if name is valid, false otherwise
 bool checkValidName(char* name) {
     if(name == NULL){
         return false;
@@ -70,6 +72,10 @@ bool checkValidName(char* name) {
     return true;
 }
 
+/// Checks if the given handle is valid
+/// A valid handle starts with an alphabetic character and contains alphanumeric characters
+/// @param handle handle to be checked
+/// @return true if handle is valid, false otherwise
 bool checkHandle(char* handle) {
 
     if(handle == NULL){
@@ -91,11 +97,11 @@ bool checkHandle(char* handle) {
     }
 
     return true;
-
-    // return true;
 }
 
-// @return true if entire string is only lowercase letters, false otherwise
+/// Validates if a command consists only of lowercase letters
+/// @param token command to be checked
+/// @return true if entire string is only lowercase letters, false otherwise
 bool checkCommand(char* token){
     if (token == NULL) {
         return false; 
@@ -110,23 +116,11 @@ bool checkCommand(char* token){
     return true; // All characters are lowercase
 }
 
-// void checkHandlesInTble(const HashADT table){
-//     void **keys = ht_keys(table);
-
-//     printf("Current handles in the table:\n");
-//     for (size_t i = 0; keys[i] != NULL; i++) {
-//         printf("%s, ", (char *)keys[i]);
-//         free(keys[i]);
-//     }
-
-//     // Free the dynamically allocated array of keys
-//     free(keys);
-// }
-
+/// Checks if a given handle exists in the hash table
+/// @param table the hashtable to search
+/// @param handle handle to be checked
+/// @return true if handle exists in table, false otherwise
 bool checkIfHandleExists(const HashADT table, const char *handle){
-
-    // for testing:
-    // checkHandlesInTble(table);
 
     if (ht_has(table, handle)) {
         return true;
@@ -136,7 +130,10 @@ bool checkIfHandleExists(const HashADT table, const char *handle){
     }
 }
 
-// @return false if handle1 and handle2 are the same, true if it is not same person
+/// checks if handle1 and handle2 are the same person
+/// @param handle1 first handle to be compared with
+/// @param handle2 second handle to be compared to
+/// @return false if handle1 and handle2 are the same, true if it is NOT the same person
 bool notSamePerson(const char *handle1, const char *handle2){
     if (str_equals(handle1, handle2)){
         printf("error: \"%s\" and \"%s\" are the same person\n", handle1, handle2);
@@ -146,17 +143,10 @@ bool notSamePerson(const char *handle1, const char *handle2){
     }
 }
 
-// void freePersonS(person_t* person){
-//     for (size_t i = 0; i < person->numOfFriends; i++) {
-//         free(person -> friends[i]);
-//     }
-//     free(person -> friends);
-//     free(person -> handle);
-//     free(person -> firstName);
-//     free(person -> lastName);
-//     free(person);
-// }
-
+/// Checks if two handles (persons) are already friends
+/// @param table hashtable to check
+/// @param handle1 first person's handle
+/// @param handle2 second person's handle
 /// @return true if handle1 and handle2 ARE friends, false otherwise
 bool areTheyFriendsAlr(const HashADT table, const char *handle1, const char *handle2){
     person_t* p1 = (person_t*)ht_get(table, handle1);
@@ -172,6 +162,10 @@ bool areTheyFriendsAlr(const HashADT table, const char *handle1, const char *han
     return false; 
 }
 
+/// Adds a friendship between two persons identified by their handles
+/// @param table hashtable to check
+/// @param handle1 first person's handle
+/// @param handle2 second person's handle
 void addFriends(const HashADT table, const char *handle1, const char *handle2){
     person_t* p1 = (person_t*)ht_get(table, handle1);
 
@@ -191,28 +185,10 @@ void addFriends(const HashADT table, const char *handle1, const char *handle2){
 
 }
 
-void freeAllValuesInHashTable(HashADT table){
-    // Get all values (persons) in the hash table
-    void **allPersons = ht_values(table);
-    if (allPersons != NULL) {
-        for (size_t i = 0; allPersons[i] != NULL; i++) {
-            person_t *person = (person_t*)allPersons[i];
-            // Free the friends array
-            free(person -> friends);
-            free(person -> handle);
-            free(person -> firstName);
-            free(person -> lastName);
-            free(person);
-        }
-        // Free the array holding all persons
-        free(allPersons);
-    }
-}
-
+/// Re-initializes the system by destroying the current hash table and creating a new, empty one
+/// @param table table with all information to be reinitialized
 void initSystem(HashADT* table) {
     
-    // freeAllValuesInHashTable(table);
-
     // Destroy the current hash table
     ht_destroy(*table);
 
@@ -225,7 +201,9 @@ void initSystem(HashADT* table) {
     printf("System re-initialized\n");
 }
 
-
+/// Prints information about a person, including their name, handle, and friend list
+/// @param table The hash table containing the people
+/// @param handle The person's handle
 void printCase(const HashADT table, const char *handle) {
     person_t* person = (person_t*)ht_get(table, handle);
     
@@ -251,8 +229,9 @@ void printCase(const HashADT table, const char *handle) {
     }
 }
 
+/// Cleans up resources and exits the program
+/// @param table the hashtable to be destroyed
 void quitCase(HashADT table) {
-    // freeAllValuesInHashTable(table);
 
     // Destroy the hash table
     ht_destroy(table);
@@ -261,6 +240,9 @@ void quitCase(HashADT table) {
     exit(EXIT_SUCCESS);
 }
 
+/// Prints the size of the friend list for a given person
+/// @param table hashtable containing the people
+/// @param handle the person's handle
 void sizeCase(const HashADT table, const char *handle){
     person_t* person = (person_t*)ht_get(table, handle);
 
@@ -279,6 +261,7 @@ void sizeCase(const HashADT table, const char *handle){
 
 }
 
+/// Prints statistics about the network, including the number of people and friendships
 void stats(){
     if(numOfPplInNetwork == 0){
         printf("Statistics:  no people, ");
@@ -298,6 +281,9 @@ void stats(){
 
 }
 
+/// Removes a friend from a person's friend list
+/// @param person delete handle from this person's friends list 
+/// @param handle handle of the friend to remove
 void removeFriend(person_t* person, const char* handle) {
     for (size_t i = 0; i < person->numOfFriends; i++) {
         if (strcmp(person->friends[i]->handle, handle) == 0) {
@@ -312,6 +298,10 @@ void removeFriend(person_t* person, const char* handle) {
     }
 }
 
+/// removes the friendship between 2 people
+/// @param table the hashtable containing all of the peoples
+/// @param handle1 handle of the first person to unfriend
+/// @param handle2 handle of the second person to unfriend
 void unfriend(const HashADT table, const char *handle1, const char *handle2) {
     person_t* p1 = (person_t*)ht_get(table, handle1);
     person_t* p2 = (person_t*)ht_get(table, handle2);
@@ -325,6 +315,9 @@ void unfriend(const HashADT table, const char *handle1, const char *handle2) {
 
 }
 
+/// frees the memory allocated for a person and their associated data
+/// @param key pointer to the key associated with the person
+/// @param value pointer to the value associated with the key
 void delete( void *key, void *value ){
     person_t* person = (person_t*)value;
     assert(person -> friends != NULL);
@@ -335,14 +328,19 @@ void delete( void *key, void *value ){
     free(person);
 }
 
+/// prints the details of a person
+/// @param key pointer to the key associated with the person
+/// @param value pointer to the value associated with the key
 void print( const void *key, const void *value ){
     (void)key;
     person_t* person = (person_t*) value;
     printf("%s (%s %s)\n", person->handle,person->firstName,person->lastName);
-    // freePersonS(person);
 }
 
-
+/// Processes commands from either standard input or a file, manipulating the social network data accordingly
+/// @param isStdin boolean indicating if the input is coming from standard input
+/// @param fp pointer to the file, if it exists and isStdin is false
+/// @param table pointer to the hash table representing the social network
 void processCommands(bool isStdin, FILE *fp, HashADT* table){
     char buffer[256];
     char *token;
@@ -354,7 +352,7 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
 
     // handles " " and "\n"
     if(isStdin){
-        while(firstInput == NULL){//this handles when user hits enter without typing in anything
+        while(firstInput == NULL){
             printf("Amici> ");
             firstInput = (isStdin ? fgets(buffer, 256, stdin) : fgets(buffer, 256, fp)); 
         }
@@ -372,7 +370,8 @@ void processCommands(bool isStdin, FILE *fp, HashADT* table){
         }
 
         if(token != NULL){
-            // if token and "add" are equal, strcmp returns 0, if, so !strcmp will be true
+
+            // if token and "add" are equal, strcmp returns 0 which would be, so !strcmp will be true
             if (!strcmp(token, "add")){
                 // add  first-name  last-name  handle              
             

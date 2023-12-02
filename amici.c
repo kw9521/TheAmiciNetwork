@@ -1,22 +1,22 @@
+/// CSCI-243: The Mechanics of Programming Project 2: The Amici Network
 /// @file amici.c
 /// @author Kunlin Wen, kw9521
 
 #define DELIMS " \t\n"
 
-#include <stddef.h>     // for size_t
 #include <stdio.h>      // for I/O operations
 #include <stdlib.h>     // for dynamic memory
-#include <errno.h>      // for errno and ENOENT
-#include <string.h>     // for strtok and other string stuff
-#include <stdbool.h>
-#include <ctype.h>      // for isalpha()
-#include <assert.h>     // for assert()
 
 #include "HashADT.h"
 #include "processArgs.h"
 #include "Support.h"
 
-// run valgrind using valgrind --leak-check=full --log-file=errors.txt ./RUN
+// run valgrind using valgrind --leak-check=full --show-leak-kinds=all --log-file=errors.txt ./RUN
+// valgrind --leak-check=full --show-leak-kinds=all --log-file=errors.txt ./amici < input.1
+
+/// @brief initializes data structure and processes commands from either the command line, a file, or standard input
+/// @param argc number of commandline arguments
+/// @param argv array of char pointers of commandline arguments
 int main(int argc, char *argv[]) {
     HashADT table = ht_create(str_hash, str_equals, print, delete);
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
             if (fp == NULL){    // something wrong with opening
                 // error occured
                 perror(argv[1]);
-                fclose(fp);
+                // fclose(fp);
                 exit(EXIT_FAILURE);
             } else {
                 // can open file 
